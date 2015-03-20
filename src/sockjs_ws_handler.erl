@@ -12,9 +12,9 @@ received(_RawWebsocket, _SessionPid, <<>>) ->
     ok;
 received(websocket, SessionPid, Data) ->
     case sockjs_json:decode(Data) of
-        Message when is_binary(Message) ->
+        {ok,Message} when is_binary(Message) ->
             session_received([Message], SessionPid);
-        Messages when is_list(Messages) ->
+        {ok,Messages} when is_list(Messages) ->
             session_received(Messages, SessionPid)
     end;
 

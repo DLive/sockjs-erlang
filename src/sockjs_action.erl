@@ -71,11 +71,15 @@ iframe(Req, Headers, #service{sockjs_url = SockjsUrl}) ->
 -spec info_test(req(), headers(), service()) -> req().
 info_test(Req, Headers, #service{websocket = Websocket,
                                  cookie_needed = CookieNeeded}) ->
-    I = #{websocket => Websocket,
-          cookie_needed => CookieNeeded,
-          origins => [<<"*:*">>],
-          entropy => sockjs_util:rand32()},
-    D = sockjs_json:encode(I),
+    % I = #{websocket => Websocket,
+    %       cookie_needed => CookieNeeded,
+    %       origins => [<<"*:*">>],
+    %       entropy => sockjs_util:rand32()},
+    I = [{websocket, Websocket},
+         {cookie_needed, CookieNeeded},
+         {origins, [<<"*:*">>]},
+         {entropy, sockjs_util:rand32()}],
+    D = sockjs_json:encode({I}),
     H = [{"Content-Type", "application/json; charset=UTF-8"}],
     sockjs_http:reply(200, H ++ Headers, D, Req).
 
@@ -167,9 +171,9 @@ handle_recv(Req, Body, Session) ->
             {error, sockjs_http:reply(500, [], "Payload expected.", Req)};
         _Any ->
             case sockjs_json:decode(Body) of
-                Message when is_binary(Message) ->
+                {ok,Message} when is_binary(Message) ->
                     sockjs_session:received([Message], Session);
-                Messages when is_list(Messages) ->
+                {ok,Messages} when is_list(Messages) ->
                     sockjs_session:received(Messages, Session)
             end,
             ok

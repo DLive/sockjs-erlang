@@ -39,7 +39,7 @@ url_escape(Str, Chars) ->
     [case lists:member(Char, Chars) of
          true  -> hex(Char);
          false -> Char
-     end || <<Char>> <- Str].
+     end || <<Char>> <= Str].
 
 hex(C) ->
     <<High:4, Low:4>> = <<C>>,
